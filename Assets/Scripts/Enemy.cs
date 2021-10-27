@@ -59,33 +59,29 @@ public class Enemy : MonoBehaviour
         protected set { target = value; }
     }
 
-    protected NavMeshAgent navMeshAgent = null;
+    protected NavMeshAgent navMeshAgent = null; 
     protected float distanceToTarget = Mathf.Infinity;
+    protected bool isGroundEnemy = true;
     protected bool isOnGround = false;
-    
+
+
+    private void Awake()
+    {
+        InitializeComponents();
+    }
 
     void Start()
     {
-        Initialize();
+        FindTarget();
     }
 
     void Update()
     {
         ProcessBehavior();
-        print("isDetected: " + isDetected());
+        //print("isDetected: " + isDetected());
     }
 
-    private void Initialize()
-    {
-        target = FindObjectOfType<Player>().gameObject;
 
-        if (target == null) { Debug.LogError("Target not found!"); return; }
-
-        CalculateDistanceToTarget();
-
-
-        navMeshAgent = GetComponent<NavMeshAgent>();
-    }
 
     private bool isDetected()
     {
@@ -119,6 +115,21 @@ public class Enemy : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * turnSpeed);
     }
 
+    protected void FindTarget()
+    {
+        target = FindObjectOfType<Player>().gameObject;
+
+        if (target == null) { Debug.LogError("Target not found!"); return; }
+
+        CalculateDistanceToTarget();
+
+        print("target found");
+    }
+
+    protected virtual void InitializeComponents()
+    {
+        navMeshAgent = GetComponent<NavMeshAgent>();
+    }
 
     protected virtual void ProcessBehavior()
     {
@@ -133,31 +144,39 @@ public class Enemy : MonoBehaviour
         else if (distanceToTarget <= chaseRange || isProvoked)
         {
             ChaseTarget();
+            isProvoked = true;
         }
 
-        if(!isDetected())
-        {
-            LeaveAttackState();
-        }
+        LeaveProvokeState();
     }
 
     protected virtual void ChaseTarget()
     {
-        Debug.Log("Enemy is chasing player");
+        isAttacking = false;
 
         navMeshAgent.SetDestination(target.transform.position);
-        isProvoked = true;
+        Debug.Log("Enemy is chasing player");
     }
 
     protected virtual void AttackTarget()
     {
+        isProvoked = true;
+        isAttacking = true;
         Debug.Log("Enemy is attacking player");
     }
 
-    protected virtual void LeaveAttackState()
+    protected virtual void LeaveProvokeState()
     {
-        navMeshAgent.SetDestination(transform.position);
-        isProvoked = false;
+        if (!isDetected() && (isProvoked || IsAttacking))
+        {
+            if (isGroundEnemy)
+            {
+                navMeshAgent.SetDestination(transform.position);
+            }
+
+            isProvoked = false;
+            isAttacking = false;
+        }
     }
 
 
