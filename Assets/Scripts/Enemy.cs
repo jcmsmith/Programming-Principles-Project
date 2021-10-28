@@ -81,7 +81,14 @@ public class Enemy : MonoBehaviour
         //print("isDetected: " + isDetected());
     }
 
+    private void FindTarget()
+    {
+        target = FindObjectOfType<Player>().gameObject;
 
+        if (target == null) { Debug.LogError("Target not found!"); return; }
+
+        CalculateDistanceToTarget();
+    }
 
     private bool isDetected()
     {
@@ -115,17 +122,6 @@ public class Enemy : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * turnSpeed);
     }
 
-    protected void FindTarget()
-    {
-        target = FindObjectOfType<Player>().gameObject;
-
-        if (target == null) { Debug.LogError("Target not found!"); return; }
-
-        CalculateDistanceToTarget();
-
-        print("target found");
-    }
-
     protected virtual void InitializeComponents()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -144,7 +140,6 @@ public class Enemy : MonoBehaviour
         else if (distanceToTarget <= chaseRange || isProvoked)
         {
             ChaseTarget();
-            isProvoked = true;
         }
 
         LeaveProvokeState();
@@ -153,6 +148,7 @@ public class Enemy : MonoBehaviour
     protected virtual void ChaseTarget()
     {
         isAttacking = false;
+        isProvoked = true;
 
         navMeshAgent.SetDestination(target.transform.position);
         Debug.Log("Enemy is chasing player");

@@ -7,14 +7,17 @@ public class AirEnemy : Enemy
 {
     [SerializeField] protected GameObject projectilePrefab;
 
-    [SerializeField] protected float launchDelay = 1f;
-    [SerializeField] protected float forceRangeX = 20f;
-    [SerializeField] protected float forceRangeZ = 20f;
+    [SerializeField] protected float projectileLaunchDelay = 1f;
+    [SerializeField] protected float randomForceRangeX = 20f;
+    [SerializeField] protected float randomForceRangeZ = 20f;
+    [SerializeField] protected float yOffset = 10f;
+    [SerializeField] protected float wanderDelay = 0.5f;
+    [SerializeField] protected float wanderMoveSpeed = 100f;
 
-    [SerializeField] protected float offset = 10f;
+
     public float Offset
     {
-        get { return offset; }
+        get { return yOffset; }
         protected set
         {
             if (value <= 2f)
@@ -29,25 +32,40 @@ public class AirEnemy : Enemy
     }
 
     protected Rigidbody rb;
+    protected bool isChasing;
 
 
     void OnEnable()
     {
         isGroundEnemy = false;
+        StartCoroutine(WanderState());
     }
 
-    private void LateUpdate()
+    private IEnumerator WanderState()
     {
-        if(!isProvoked && !isAttacking)
+        if (!isProvoked && !isAttacking)
         {
-            rb.AddForce(CalculateRandomForce(), ForceMode.VelocityChange);
+            yield return new WaitForSeconds(wanderDelay);
+            rb.AddForce(CalculateRandomForce() * wanderMoveSpeed * Time.deltaTime, ForceMode.Impulse);
+            print("Wander");          
         }
+        else
+        {
+            yield break;
+        }
+    }
+
+    protected IEnumerator MoveTowardsTarget(Vector3 _target = new Vector3())
+    {
+        yield return new WaitForEndOfFrame();
+        print("MoveTowardsTarget");
+        rb.AddRelativeForce(_target - transform.position, ForceMode.Impulse);
     }
 
     protected Vector3 CalculateRandomForce()
     {
-        float _forceX = Random.Range(-forceRangeX, forceRangeX);
-        float _forceZ = Random.Range(-forceRangeZ, forceRangeZ);
+        float _forceX = Random.Range(-randomForceRangeX, randomForceRangeX);
+        float _forceZ = Random.Range(-randomForceRangeZ, randomForceRangeZ);
 
         Vector3 _forceDirection = new Vector3(_forceX, 0f, _forceZ);
 
@@ -57,11 +75,10 @@ public class AirEnemy : Enemy
     //Calculate the position directly above the player, on the same plane as this enemy
     protected Vector3 CalculateTargetSpot()
     {
-        Vector3 _targetSpot = target.transform.position + new Vector3(0f, offset, 0f);
-
+        Vector3 _targetSpot = target.transform.position + new Vector3(0f, yOffset, 0f);
+        print(_targetSpot);
         return _targetSpot;
     }
-
 
     protected override void InitializeComponents()
     {
@@ -70,18 +87,44 @@ public class AirEnemy : Enemy
 
     protected override void ChaseTarget()
     {
-        Vector3 _targetSpot = CalculateTargetSpot();
-
-        rb.AddForce(_targetSpot, ForceMode.Impulse);
+        if(!isChasing)
+        {
+            isAttacking = false;
+            isProvoked = true;
+            isChasing = true;
+            StopCoroutine(HandleProjectiles());
+            StartCoroutine(MoveTowardsTarget(CalculateTargetSpot()));
+        }
     }
 
     protected override void AttackTarget()
     {
-        StartCoroutine(HandleProjectiles());
+        if(!isAttacking)
+        {
+            isChasing = false;
+            isAttacking = true;
+            isProvoked = true;
+            StartCoroutine(HandleProjectiles());
+        }   
+    }
+
+    protected override void LeaveProvokeState()
+    {
+        if(!IsDetected() && (isProvoked || IsAttacking))
+        {
+            isProvoked = false;
+            isAttacking = false;
+            isChasing = false;
+
+            StopCoroutine(HandleProjectiles());
+            StopCoroutine(MoveTowardsTarget());
+            StartCoroutine(WanderState());
+        }
     }
 
     protected virtual IEnumerator HandleProjectiles(float _launchDelay = 1f)
     {
+        print("HandleProjectiles");
         Instantiate(projectilePrefab);
 
         yield return new WaitForSeconds(_launchDelay);
