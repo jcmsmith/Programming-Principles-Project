@@ -352,7 +352,7 @@ MonoBehaviour:
   projectileLaunchDelay: 1
   randomForceRangeX: 20
   randomForceRangeZ: 20
-  yOffset: 10
+  yOffset: 17
   wanderDelay: 0.5
   wanderMoveSpeed: 100
 --- !u!1 &195971609

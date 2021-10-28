@@ -13,6 +13,7 @@ public class AirEnemy : Enemy
     [SerializeField] protected float yOffset = 10f;
     [SerializeField] protected float wanderDelay = 0.5f;
     [SerializeField] protected float wanderMoveSpeed = 100f;
+    [SerializeField] protected float chaseMoveSpeed = 100f;
 
 
     public float Offset
@@ -35,31 +36,10 @@ public class AirEnemy : Enemy
     protected bool isChasing;
 
 
-    void OnEnable()
+    private void OnEnable()
     {
         isGroundEnemy = false;
         StartCoroutine(WanderState());
-    }
-
-    private IEnumerator WanderState()
-    {
-        if (!isProvoked && !isAttacking)
-        {
-            yield return new WaitForSeconds(wanderDelay);
-            rb.AddForce(CalculateRandomForce() * wanderMoveSpeed * Time.deltaTime, ForceMode.Impulse);
-            print("Wander");          
-        }
-        else
-        {
-            yield break;
-        }
-    }
-
-    protected IEnumerator MoveTowardsTarget(Vector3 _target = new Vector3())
-    {
-        yield return new WaitForEndOfFrame();
-        print("MoveTowardsTarget");
-        rb.AddRelativeForce(_target - transform.position, ForceMode.Impulse);
     }
 
     protected Vector3 CalculateRandomForce()
@@ -92,8 +72,8 @@ public class AirEnemy : Enemy
             isAttacking = false;
             isProvoked = true;
             isChasing = true;
-            StopCoroutine(HandleProjectiles());
-            StartCoroutine(MoveTowardsTarget(CalculateTargetSpot()));
+            StopCoroutine(AttackState());
+            StartCoroutine(ChaseState());
         }
     }
 
@@ -104,11 +84,11 @@ public class AirEnemy : Enemy
             isChasing = false;
             isAttacking = true;
             isProvoked = true;
-            StartCoroutine(HandleProjectiles());
+            StartCoroutine(AttackState());
         }   
     }
 
-    protected override void LeaveProvokeState()
+    protected override void ReturnToWanderState()
     {
         if(!IsDetected() && (isProvoked || IsAttacking))
         {
@@ -116,18 +96,44 @@ public class AirEnemy : Enemy
             isAttacking = false;
             isChasing = false;
 
-            StopCoroutine(HandleProjectiles());
-            StopCoroutine(MoveTowardsTarget());
+            StopCoroutine(AttackState());
+            StopCoroutine(ChaseState());
             StartCoroutine(WanderState());
         }
     }
 
-    protected virtual IEnumerator HandleProjectiles(float _launchDelay = 1f)
+    private IEnumerator WanderState()
     {
-        print("HandleProjectiles");
-        Instantiate(projectilePrefab);
-
-        yield return new WaitForSeconds(_launchDelay);
+        while (!isProvoked && !isAttacking)
+        {
+            yield return new WaitForSeconds(wanderDelay);
+            rb.AddRelativeForce(CalculateRandomForce() * wanderMoveSpeed * Time.deltaTime, ForceMode.Impulse);
+            print("Wander");
+        }
     }
+
+    protected IEnumerator ChaseState()
+    {
+        while (isProvoked)
+        {
+            Vector3 _targetSpot = CalculateTargetSpot();
+            yield return new WaitForEndOfFrame();
+            print("MoveTowardsTarget");
+            rb.AddRelativeForce(_targetSpot, ForceMode.Impulse);
+        }
+    }
+
+    protected virtual IEnumerator AttackState(float _launchDelay = 1f)
+    {
+        while(isAttacking)
+        {
+            yield return new WaitForSeconds(_launchDelay);
+            print("Attacking");
+            Instantiate(projectilePrefab);
+        }
+    }
+
+
+
 }
 
