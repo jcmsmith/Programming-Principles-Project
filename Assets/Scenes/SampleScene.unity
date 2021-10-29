@@ -346,7 +346,7 @@ MonoBehaviour:
   damageDealt: 10
   turnSpeed: 5
   detectionRange: 50
-  attackRange: 7
+  attackRange: 15
   chaseRange: 35
   projectilePrefab: {fileID: 4049149491521391035, guid: 2c79ef8952318024d87048ea7bd45d6c, type: 3}
   projectileLaunchDelay: 1
@@ -489,9 +489,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageDealt: 10
   turnSpeed: 5
-  detectionRange: 30
-  attackRange: 4
-  chaseRange: 15
+  detectionRange: 35
+  attackRange: 10
+  chaseRange: 30
 --- !u!54 &195971616
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1117,6 +1117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63b0f468190190d47a41bf00cf394db3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 10
 --- !u!54 &1646548132
 Rigidbody:
   m_ObjectHideFlags: 0

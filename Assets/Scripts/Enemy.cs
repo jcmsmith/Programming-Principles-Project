@@ -11,6 +11,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float turnSpeed = 5f;
 
 
+    //ENCAPSULATION
     [SerializeField] protected float detectionRange = 20f;
     public float DetectionRange
     {
@@ -59,7 +60,7 @@ public class Enemy : MonoBehaviour
         protected set { target = value; }
     }
 
-    protected NavMeshAgent navMeshAgent = null; 
+    protected NavMeshAgent navMeshAgent = null;
     protected float distanceToTarget = Mathf.Infinity;
     protected bool isGroundEnemy = true;
     protected bool isOnGround = false;
@@ -72,6 +73,7 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
+        //ABSTRACTION
         FindTarget();
     }
 
@@ -80,6 +82,7 @@ public class Enemy : MonoBehaviour
         ProcessBehavior();
         //print("isDetected: " + isDetected());
     }
+
 
     private void FindTarget()
     {
@@ -107,7 +110,6 @@ public class Enemy : MonoBehaviour
         return _detection;
     }
 
-
     protected float CalculateDistanceToTarget()
     {
         float distance = Vector3.Distance(transform.position, target.transform.position);
@@ -115,6 +117,7 @@ public class Enemy : MonoBehaviour
         return distance;
     }
 
+    //INHERITANCE
     protected void FaceTarget()
     {
         Vector3 direction = (target.transform.position - transform.position).normalized;
@@ -127,6 +130,7 @@ public class Enemy : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
+    //POLYMORPHISM
     protected virtual void ProcessBehavior()
     {
         distanceToTarget = CalculateDistanceToTarget();

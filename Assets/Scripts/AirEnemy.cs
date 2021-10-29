@@ -48,6 +48,7 @@ public class AirEnemy : Enemy
         rb = GetComponent<Rigidbody>();
     }
 
+    //POLYMORPHISM
     protected override void ChaseTarget()
     {
         if(!isChasing)
@@ -60,6 +61,7 @@ public class AirEnemy : Enemy
         }
     }
 
+    //POLYMORPHISM
     protected override void AttackTarget()
     {
         if(!isAttacking)
@@ -71,6 +73,7 @@ public class AirEnemy : Enemy
         }   
     }
 
+    //POLYMORPHISM
     protected override void ReturnToStartingState()
     {
         if(!IsDetected() && (isProvoked || IsAttacking))
@@ -116,6 +119,7 @@ public class AirEnemy : Enemy
         }
     }
 
+    //ENCAPSULATION
     private void LaunchProjectile()
     {
         Projectile _projectile = Instantiate(projectilePrefab, transform.position, transform.rotation).GetComponent<Projectile>();
