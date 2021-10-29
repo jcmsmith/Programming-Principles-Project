@@ -142,7 +142,7 @@ public class Enemy : MonoBehaviour
             ChaseTarget();
         }
 
-        ReturnToWanderState();
+        ReturnToStartingState();
     }
 
     protected virtual void ChaseTarget()
@@ -161,7 +161,7 @@ public class Enemy : MonoBehaviour
         Debug.Log("Enemy is attacking player");
     }
 
-    protected virtual void ReturnToWanderState()
+    protected virtual void ReturnToStartingState()
     {
         if (!isDetected() && (isProvoked || IsAttacking))
         {

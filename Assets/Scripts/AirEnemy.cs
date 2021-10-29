@@ -10,27 +10,9 @@ public class AirEnemy : Enemy
     [SerializeField] protected float projectileLaunchDelay = 1f;
     [SerializeField] protected float randomForceRangeX = 20f;
     [SerializeField] protected float randomForceRangeZ = 20f;
-    [SerializeField] protected float yOffset = 10f;
     [SerializeField] protected float wanderDelay = 0.5f;
     [SerializeField] protected float wanderMoveSpeed = 100f;
     [SerializeField] protected float chaseMoveSpeed = 100f;
-
-
-    public float Offset
-    {
-        get { return yOffset; }
-        protected set
-        {
-            if (value <= 2f)
-            {
-                Debug.LogError("Air enemies must have an offset value of at least 2!");
-            }
-            else if(value > 20f)
-            {
-                Debug.LogWarning("Air enemies will increasingly be offscreen with offset values above 20");
-            }
-        }
-    }
 
     protected Rigidbody rb;
     protected bool isChasing;
@@ -55,9 +37,10 @@ public class AirEnemy : Enemy
     //Calculate the position directly above the player, on the same plane as this enemy
     protected Vector3 CalculateTargetSpot()
     {
-        Vector3 _targetSpot = target.transform.position + new Vector3(0f, yOffset, 0f);
-        print(_targetSpot);
-        return _targetSpot;
+        Vector3 _targetVector = target.transform.position - transform.position;
+        _targetVector.y = 0;
+
+        return _targetVector;
     }
 
     protected override void InitializeComponents()
@@ -88,7 +71,7 @@ public class AirEnemy : Enemy
         }   
     }
 
-    protected override void ReturnToWanderState()
+    protected override void ReturnToStartingState()
     {
         if(!IsDetected() && (isProvoked || IsAttacking))
         {
@@ -102,7 +85,7 @@ public class AirEnemy : Enemy
         }
     }
 
-    private IEnumerator WanderState()
+    protected virtual IEnumerator WanderState()
     {
         while (!isProvoked && !isAttacking)
         {
@@ -112,14 +95,13 @@ public class AirEnemy : Enemy
         }
     }
 
-    protected IEnumerator ChaseState()
+    protected virtual IEnumerator ChaseState()
     {
         while (isProvoked)
         {
-            Vector3 _targetSpot = CalculateTargetSpot();
-            yield return new WaitForEndOfFrame();
             print("MoveTowardsTarget");
-            rb.AddRelativeForce(_targetSpot, ForceMode.Impulse);
+            rb.AddForce(CalculateTargetSpot() * chaseMoveSpeed, ForceMode.Force);
+            yield return new WaitForEndOfFrame();
         }
     }
 
@@ -128,12 +110,18 @@ public class AirEnemy : Enemy
         while(isAttacking)
         {
             yield return new WaitForSeconds(_launchDelay);
-            print("Attacking");
-            Instantiate(projectilePrefab);
+
+            LaunchProjectile();
+
         }
     }
 
+    private void LaunchProjectile()
+    {
+        Projectile _projectile = Instantiate(projectilePrefab, transform.position, transform.rotation).GetComponent<Projectile>();
 
+       _projectile.SetTarget(target);
+    }
 
 }
 
