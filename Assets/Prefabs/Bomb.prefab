@@ -109,8 +109,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03708bd3d6b6f5749a9909351426b5af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  explosionVFX: {fileID: 0}
-  speed: 100
+  explosionVFX: {fileID: 3279330236795484536, guid: fb758f60bfa23ae43be8b6c8579ada0b, type: 3}
+  speedMultiplier: 1
   selfDestructionDelay: 2
 --- !u!54 &8813540239863997133
 Rigidbody:

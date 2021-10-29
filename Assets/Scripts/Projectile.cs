@@ -42,10 +42,9 @@ public class Projectile : MonoBehaviour
 
         if (explosionVFX != null)
         {
-            Instantiate(explosionVFX);
+            Instantiate(explosionVFX, transform.position, Quaternion.identity);
         }
 
-        print("Self-destructed after " + _delay + " seconds");
         Destroy(gameObject);
     }
 
